@@ -10,7 +10,7 @@ for trial in 1 2 3 4
 do
   for rel in $RELEASES
   do
-    echo "=== S32-trig rakudo-$rel trial $trial ==="
+    echo "=== rx.t rakudo-$rel trial $trial ==="
     date
     ( cd rakudo-$rel;
       /usr/bin/time /usr/bin/perl t/harness --fudge --keep-exit-code --icu=1 --verbosity=1 t/spec/S05-mass/rx.t
