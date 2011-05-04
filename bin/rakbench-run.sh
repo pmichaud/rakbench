@@ -1,13 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
 ARCH=$(uname -i)
 mkdir -p log
 
-LOGFILE=$(date +log/rakbench-$HOSTNAME-$ARCH-%Y%m%d%H%m.log)
+LOGFILE=$(date +log/rakbench-$HOSTNAME-$ARCH-%Y%m%d%H%M.log)
 
-for t in bin/rakbench-??.sh
+(for t in bin/rakbench-??.sh
 do
-  echo "== $t start ==" >>$LOGFILE
-  sh $t >>$LOGFILE 2>&1
-  echo "== $t end ==" >>$LOGFILE
-done
+  echo "== $t start =="
+  sh $t
+  echo "== $t end =="
+done) |& tee $LOGFILE
