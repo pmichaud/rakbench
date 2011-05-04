@@ -1,7 +1,7 @@
 #!/bin/sh
 ####
-## rakbench-3.sh:
-##   Time needed to run the t/spec/S32-trig/atan2.t test
+## rakbench-04.sh:
+##   Time needed to run t/spec/S05-mass/rx.t
 ####
 
 RELEASES="2011.01 2011.02 2011.03 2011.04"
@@ -13,7 +13,7 @@ do
     echo "=== S32-trig rakudo-$rel trial $trial ==="
     date
     ( cd rakudo-$rel;
-      /usr/bin/time /usr/bin/perl t/harness --fudge --keep-exit-code --icu=1 --verbosity=1 t/spec/S32-trig/atan2.t 
+      /usr/bin/time /usr/bin/perl t/harness --fudge --keep-exit-code --icu=1 --verbosity=1 t/spec/S05-mass/rx.t
     )
     date
   done
