@@ -1,9 +1,9 @@
 #!/bin/bash
 
 ARCH=$(uname -i)
-mkdir -p log
+mkdir -p log 
 
-LOGFILE=$(date +log/rakbench-$HOSTNAME-$ARCH-%Y%m%d%H%M.log)
+LOGFILE=$(date +log/$HOSTNAME-$ARCH-%Y%m%d%H%M.log)
 
 (
 # output some statistics
