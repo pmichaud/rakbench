@@ -5,15 +5,16 @@
 ##   as rakudo itself.
 ####
 
-RELEASES="2011.01 2011.02 2011.03 2011.04"
+TRIALS="${TRIALS:-1 2 3 4}"
+RELEASES="${RELEASES:-$(echo rakudo-201?.??)}"
 
-for trial in 1 2 3 4
+for trial in $TRIALS
 do
   for rel in $RELEASES
   do
-    echo "=== build rakudo-$rel trial $trial ==="
+    echo "=== build $rel trial $trial ==="
     date
-    ( cd rakudo-$rel; make clean; time make )
+    ( cd $rel; make clean; time make )
     date
   done
 done

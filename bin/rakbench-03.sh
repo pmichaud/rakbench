@@ -4,15 +4,16 @@
 ##   Time needed to run the t/spec/S32-trig/atan2.t test
 ####
 
-RELEASES="2011.01 2011.02 2011.03 2011.04"
+TRIALS="${TRIALS:-1 2 3 4}"
+RELEASES="${RELEASES:-$(echo rakudo-201?.??)}"
 
-for trial in 1 2 3 4
+for trial in $TRIALS
 do
   for rel in $RELEASES
   do
-    echo "=== atan2.t rakudo-$rel trial $trial ==="
+    echo "=== atan2 $rel trial $trial ==="
     date
-    ( cd rakudo-$rel;
+    ( cd $rel;
       /usr/bin/time /usr/bin/perl t/harness --fudge --keep-exit-code --icu=1 --verbosity=1 t/spec/S32-trig/atan2.t 
     )
     date
