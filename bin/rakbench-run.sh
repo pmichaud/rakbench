@@ -4,6 +4,8 @@ ARCH=$(uname -i)
 mkdir -p log 
 
 LOGFILE=$(date +log/$HOSTNAME-$ARCH-%Y%m%d%H%M.log)
+BENCH=${BENCH:-$(echo bin/rakbench-??.sh)}
+echo $BENCH
 
 (
 # output some statistics
@@ -11,7 +13,7 @@ uname -a
 grep MemTotal /proc/meminfo
 date
 # run the suite
-for t in bin/rakbench-??.sh
+for t in $BENCH
 do
   echo "== $t start =="
   date
