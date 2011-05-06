@@ -4,10 +4,10 @@
 ##   Time needed to run the common spectests (in src/commontest.data)
 ##   on multiple releases.  Because running spectests takes so long,
 ##   this script is not included by default in rakudo-run.sh, and
-##   it defaults to running only one trial per release.
+##   it defaults to running only two trials per release.
 ####
 
-TRIALS="${TRIALS:-1}"
+TRIALS="${TRIALS:-1 2}"
 RELEASES="${RELEASES:-$(echo rakudo-201?.??)}"
 
 for trial in $TRIALS
