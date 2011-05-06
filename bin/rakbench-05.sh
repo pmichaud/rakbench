@@ -14,6 +14,7 @@ do
     echo "=== startup $rel trial $trial ==="
     date
     ( cd $rel;
+      echo /usr/bin/time ./perl6 -e 1
       /usr/bin/time ./perl6 -e 1
     )
     date
