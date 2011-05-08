@@ -4,14 +4,36 @@ use warnings;
 use strict;
 use Data::Dumper;
 
+sub minmax {
+  my ($hashref, $val) = @_;
+  $hashref->{'min'} = $val if 
+    !defined($hashref->{'min'}) || $val < $hashref->{'min'};
+  $hashref->{'max'} = $val if 
+    !defined($hashref->{'max'}) || $val > $hashref->{'max'};
+}
+
+my %info;
+my %buildid;
+while (<>) {
+    last if /===rakbench begin /;
+    chomp;
+    if (m!^(\S+)/RAKBENCH-ID=(.*)!) { $buildid{$1} = $2; next; }
+    if (m!^([\w/]+)=(.*)!)          { $info{$1} = $2; next; }
+    if (m!^Mem:\s*(\d+)!)           { $info{'mem'} = $1; next; }
+    if (m!^Architecture:\s*(\S+)!)  { $info{'arch'} = $1; next; }
+    if (m!^gcc version (\S+)!)      { $info{'gcc'} = $1; next; }
+    if (m!^Description:\s*(.*)!)    { $info{'os_desc'} = $1; next; }
+}
+
 my %seen;
-my (@bench, @rakudo, @trial);
+my (@bench, @build, @trial);
 my %mark;
 while (<>) {
-    if (/^=== (\S+) (\S+) trial (\S+) ===/) {
-        my ($bench, $rakudo, $trial) = ($1, $2, $3);
+    if (/^===rakbench run bench=(\S+) build=(\S+) trial=(\S+) ===/) {
+        my ($bench, $build, $trial) = ($1, $2, $3);
+        $bench =~ s!^(\S*/)?[A-Z]\d+-!!;
         push @bench, $bench unless $seen{$bench}++;
-        push @rakudo, $rakudo unless $seen{$rakudo}++;
+        push @build, $build unless $seen{$build}++;
         push @trial, $trial unless $seen{$trial}++;
         if ($bench eq 'build') {
             while (<>) { last if /^Stage 'pir':/; }
@@ -19,30 +41,28 @@ while (<>) {
         while (<>) {
             if (/((\d+):(\d+.\d+)elapsed)/) {
                 my $elapsed = $2 * 60 + $3;
-                $mark{$bench}{$rakudo}{$trial} = $elapsed;
-                $mark{$bench}{$rakudo}{'min'} = $elapsed
-                    if !defined($mark{$bench}{$rakudo}{'min'})
-                       || $elapsed < $mark{$bench}{$rakudo}{'min'};
-                # print "$bench $rakudo $trial $elapsed\n";
+                $mark{$bench}{$build}{$trial} = $elapsed;
+                minmax($mark{$bench}{$build}, $elapsed);
+                minmax($mark{$bench}, $elapsed);
+                # print "$bench $build $trial $elapsed\n";
                 last;
             }
         }
     }
 }
 
-my %rakid;
-foreach my $rakudo (@rakudo) {
-    $rakid{$rakudo} = $rakudo;
-    if (open(my $rakfh, "<", "$rakudo/RAKBENCH-ID")) {
-        $_ = <$rakfh>; chomp $_; $rakid{$rakudo} = $_;
-        close($rakfh);
-    }
-}
 
 foreach (qw(1 2 3 4)) { push @trial, $_ unless $seen{$_}++ }
+foreach (@build) { $buildid{$_} = $_ unless $buildid{$_}; }
 
+my $mem = sprintf("%.0fMB", $info{'mem'} / (1024*1024));
+print 
+  "$info{'hostname'} $info{'id/sys_vendor'} $info{'id/product_name'} ",
+  "$info{'arch'} $mem ",
+  "$info{'os_desc'} gcc=$info{'gcc'}\n";
+print "$info{'rundate'}\n";
 
-my $rak0 = $rakudo[0];
+my $build0 = $build[0];
 printf "%-26s", "Version";
 foreach (@trial) { print "     T$_ "; }
 print "    Fastest  vs base\n";
@@ -51,16 +71,17 @@ print "\n";
 
 foreach my $bench (@bench) {
     print "$bench:\n";
-    my $min0 = $mark{$bench}{$rak0}{'min'};
-    foreach my $rakudo (@rakudo) {
-        printf "  %-24s", $rakid{$rakudo};
+    my $min0 = $mark{$bench}{$build0}{'min'};
+    my $markfmt = $mark{$bench}{'max'} < 10 ? '%8.2f' : '%8.1f';
+    foreach my $build (@build) {
+        printf "  %-24s", $buildid{$build};
         foreach my $trial (@trial) {
-            my $mark = $mark{$bench}{$rakudo}{$trial};
-            my $out = defined($mark) ? sprintf("%8.1f", $mark) : '';
+            my $mark = $mark{$bench}{$build}{$trial};
+            my $out = defined($mark) ? sprintf($markfmt, $mark) : '';
             printf "%8s", $out;
         }
-        my $min = $mark{$bench}{$rakudo}{'min'};
-        printf "%11.1f%8.1f%%", $min, ($min/$min0)*100;
+        my $min = $mark{$bench}{$build}{'min'};
+        printf "   $markfmt%8.1f%%", $min, ($min/$min0)*100;
         printf "\n";
     }
     printf "\n";
