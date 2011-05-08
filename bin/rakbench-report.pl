@@ -14,7 +14,11 @@ sub minmax {
 
 my %info;
 my %buildid;
-while (<>) {
+
+open(my $IN, "<", $ARGV[0])
+  or die "Cannot read $ARGV[0]: $!\n";
+
+while (<$IN>) {
     last if /===rakbench begin /;
     chomp;
     if (m!^(\S+)/RAKBENCH-ID=(.*)!) { $buildid{$1} = $2; next; }
@@ -28,17 +32,18 @@ while (<>) {
 my %seen;
 my (@bench, @build, @trial);
 my %mark;
-while (<>) {
+while (<$IN>) {
     if (/^===rakbench run bench=(\S+) build=(\S+) trial=(\S+) ===/) {
         my ($bench, $build, $trial) = ($1, $2, $3);
         $bench =~ s!^(\S*/)?[A-Z]\d+-!!;
+        if ($bench eq 'build') {
+            while (<$IN>) { last if /^Stage 'pir':/; }
+            $bench = 'core.pm';
+        }
         push @bench, $bench unless $seen{$bench}++;
         push @build, $build unless $seen{$build}++;
         push @trial, $trial unless $seen{$trial}++;
-        if ($bench eq 'build') {
-            while (<>) { last if /^Stage 'pir':/; }
-        }
-        while (<>) {
+        while (<$IN>) {
             if (/((\d+):(\d+.\d+)elapsed)/) {
                 my $elapsed = $2 * 60 + $3;
                 $mark{$bench}{$build}{$trial} = $elapsed;
@@ -50,7 +55,7 @@ while (<>) {
         }
     }
 }
-
+close($IN);
 
 foreach (qw(1 2 3 4)) { push @trial, $_ unless $seen{$_}++ }
 foreach (@build) { $buildid{$_} = $_ unless $buildid{$_}; }
@@ -70,6 +75,7 @@ print '-' x 78;
 print "\n";
 
 foreach my $bench (@bench) {
+    no warnings;
     print "$bench:\n";
     my $min0 = $mark{$bench}{$build0}{'min'};
     my $markfmt = $mark{$bench}{'max'} < 10 ? '%8.2f' : '%8.1f';
