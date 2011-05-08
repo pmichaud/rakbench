@@ -1,0 +1,6 @@
+#!/bin/sh
+
+CMD="/usr/bin/time ./perl6 -e 1"
+
+echo $CMD
+$CMD

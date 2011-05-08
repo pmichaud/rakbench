@@ -1,0 +1,6 @@
+#!/bin/sh
+
+CMD="/usr/bin/time $SPECTEST --verbosity=1 t/spec/S32-trig/sin.t"
+
+echo $CMD
+$CMD

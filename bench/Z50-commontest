@@ -1,0 +1,7 @@
+#!/bin/sh
+# Default-Trials: 2
+
+CMD="/usr/bin/time $SPECTEST --verbosity=0 --tests-from-file=$RAKBENCH_DIR/src/commontest.data"
+
+echo $CMD
+HARNESS_NOTTY=1 $CMD
