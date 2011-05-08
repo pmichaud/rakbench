@@ -71,6 +71,7 @@ function buildinfo() {
         isodate
         case $bench in
           *.p6)
+            echo "/usr/bin/time ./perl6 $BENCH"
             (cd $build; /usr/bin/time ./perl6 $BENCH)
             ;;
           *)
