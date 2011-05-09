@@ -21,6 +21,7 @@ open(my $IN, "<", $ARGV[0])
 while (<$IN>) {
     last if /===rakbench begin /;
     chomp;
+    if (m!^(\S+)/RAKBENCH-ID=(.*)!)   { $buildnick{$1} = $2; }   # ver 001
     if (m!^(\S+)/RAKBENCH-NICK=(.*)!) { $buildnick{$1} = $2; }
     if (m!^([^\s=]+)=(.*)!)           { $info{$1} = $2; next; }
     if (m!^Mem:\s*(\d+)!)             { $info{'mem'} = $1; next; }
