@@ -13,7 +13,7 @@ sub minmax {
 }
 
 my %info;
-my %buildid;
+my %buildnick;
 
 open(my $IN, "<", $ARGV[0])
   or die "Cannot read $ARGV[0]: $!\n";
@@ -21,12 +21,12 @@ open(my $IN, "<", $ARGV[0])
 while (<$IN>) {
     last if /===rakbench begin /;
     chomp;
-    if (m!^(\S+)/RAKBENCH-ID=(.*)!) { $buildid{$1} = $2; next; }
-    if (m!^([\w/]+)=(.*)!)          { $info{$1} = $2; next; }
-    if (m!^Mem:\s*(\d+)!)           { $info{'mem'} = $1; next; }
-    if (m!^Architecture:\s*(\S+)!)  { $info{'arch'} = $1; next; }
-    if (m!^gcc version (\S+)!)      { $info{'gcc'} = $1; next; }
-    if (m!^Description:\s*(.*)!)    { $info{'os_desc'} = $1; next; }
+    if (m!^(\S+)/RAKBENCH-NICK=(.*)!) { $buildnick{$1} = $2; }
+    if (m!^([^\s=]+)=(.*)!)           { $info{$1} = $2; next; }
+    if (m!^Mem:\s*(\d+)!)             { $info{'mem'} = $1; next; }
+    if (m!^Architecture:\s*(\S+)!)    { $info{'arch'} = $1; next; }
+    if (m!^gcc version (\S+)!)        { $info{'gcc'} = $1; next; }
+    if (m!^Description:\s*(.*)!)      { $info{'os_desc'} = $1; next; }
 }
 
 my %seen;
@@ -58,7 +58,7 @@ while (<$IN>) {
 close($IN);
 
 foreach (qw(1 2 3 4)) { push @trial, $_ unless $seen{$_}++ }
-foreach (@build) { $buildid{$_} = $_ unless $buildid{$_}; }
+foreach (@build) { $buildnick{$_} = $_ unless $buildnick{$_}; }
 
 my $mem = sprintf("%.0fMB", $info{'mem'} / (1024*1024));
 print 
@@ -80,7 +80,7 @@ foreach my $bench (@bench) {
     my $min0 = $mark{$bench}{$build0}{'min'} || 1;
     my $markfmt = $mark{$bench}{'max'} < 10 ? '%8.2f' : '%8.1f';
     foreach my $build (@build) {
-        printf "  %-24s", $buildid{$build};
+        printf "  %-24s", $buildnick{$build};
         foreach my $trial (@trial) {
             my $mark = $mark{$bench}{$build}{$trial};
             my $out = defined($mark) ? sprintf($markfmt, $mark) : '';
@@ -91,4 +91,18 @@ foreach my $bench (@bench) {
         printf "\n";
     }
     printf "\n";
+}
+
+print '-' x 78;
+print "\n";
+
+print "\n";
+print "Build information:\n";
+my @infokeys = sort keys %info;
+foreach my $build (@build) {
+    print "  $buildnick{$build}: Rakudo $info{$build.'/rakudo-version'}, Parrot $info{$build.'/parrot_config-git_describe'}\n";
+    my $note = "    - ";
+    foreach my $key (grep /^$build\/RAKBENCH-NOTE/ , @infokeys) {
+        print "$note$info{$key}\n";
+    }
 }
