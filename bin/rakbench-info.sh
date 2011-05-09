@@ -2,7 +2,7 @@
 
 for build in "$@"
 do
-  RAKBENCH = $build/RAKBENCH
+  RAKBENCH=$build/RAKBENCH
   [ -f $RAKBENCH ] && 
     { echo "$RAKBENCH exists...skipping"; continue; }
   echo "Creating $RAKBENCH..."
