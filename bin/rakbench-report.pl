@@ -77,7 +77,7 @@ print "\n";
 foreach my $bench (@bench) {
     no warnings;
     print "$bench:\n";
-    my $min0 = $mark{$bench}{$build0}{'min'};
+    my $min0 = $mark{$bench}{$build0}{'min'} || 1;
     my $markfmt = $mark{$bench}{'max'} < 10 ? '%8.2f' : '%8.1f';
     foreach my $build (@build) {
         printf "  %-24s", $buildid{$build};
