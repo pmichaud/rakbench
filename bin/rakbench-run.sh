@@ -39,8 +39,14 @@ function sysinfo() {
 function buildinfo() {
   for build in $BUILDLIST
   do
-    [ -r $build/RAKBENCH-ID ] && 
-      echo "$build/RAKBENCH-ID=$(< $build/RAKBENCH-ID)"
+    [ -r $build/RAKBENCH ] ||
+      { echo "Cannot read $build/RAKBENCH... aborting"; exit 1; }
+    sed -e "s!^!$build/RAKBENCH-!" $build/RAKBENCH
+    for key in gc_type git_describe
+    do
+      echo "$build/parrot_config-$key=$($build/parrot_install/bin/parrot_config $key)"
+    done
+    echo "$build/rakudo-version=$(cd $build; perl build/gen_version.pl | perl -ne 'print /RAKUDO_VERSION .(.+)./')"
   done
 }
 
@@ -50,7 +56,7 @@ function buildinfo() {
 
 (
   echo "===rakbench runinfo ==="
-  echo "rakbench-version=001"
+  echo "rakbench-version=002"
   echo "rundate=$(isodate)"
   echo "BENCHLIST=$BENCHLIST"
   echo "BUILDLIST=$BUILDLIST"
