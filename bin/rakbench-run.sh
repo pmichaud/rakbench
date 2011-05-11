@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ARCH=$(uname -i)
-LOGFILE=$(date -u +log/$HOSTNAME-$ARCH-%Y%m%d%H%M.log)
+LOGFILE=$(date -u +$HOSTNAME-$ARCH-%Y%m%d%H%M.log)
 export SPECTEST="/usr/bin/perl t/harness --fudge --keep-exit-code"
 export RAKBENCH_DIR=$PWD
 
@@ -18,6 +18,7 @@ fi
 
 BENCHLIST=${BENCHLIST:-$(echo bench/B*)}
 BUILDLIST=${BUILDLIST:-$(echo rakudo-2011*)}
+DEFAULTTRIALS=${DEFAULTTRIALS:-4}
 
 function isodate() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
 
@@ -51,8 +52,9 @@ function buildinfo() {
 }
 
 
-[ -f $LOGFILE ] &&
-  { echo "$LOGFILE already exists... aborting"; exit 1; }
+[ -f log/$LOGFILE ] &&
+  { echo "log/$LOGFILE already exists... aborting"; exit 1; }
+(cd log; ln -sf $LOGFILE latest.log)
 
 (
   echo "===rakbench runinfo ==="
@@ -67,7 +69,7 @@ function buildinfo() {
   do
     BENCH=$(readlink -f $bench)
     BENCHTRIAL=$(perl -ne '/Default-Trials: (\S+)/ && print $1' $BENCH)
-    TRIALLIST=$(seq 1 ${BENCHTRIAL:-4})
+    TRIALLIST=$(seq 1 ${BENCHTRIAL:-$DEFAULTTRIALS})
     echo $TRIALLIST
     for trial in $TRIALLIST
     do
@@ -90,5 +92,5 @@ function buildinfo() {
   done
 
   echo "===rakbench end date=$(isodate) ==="
-) |& tee $LOGFILE
+) |& tee log/$LOGFILE
 
