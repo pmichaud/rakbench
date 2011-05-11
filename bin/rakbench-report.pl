@@ -15,8 +15,10 @@ sub minmax {
 my %info;
 my %buildnick;
 
-open(my $IN, "<", $ARGV[0])
-  or die "Cannot read $ARGV[0]: $!\n";
+my $INFILE = $ARGV[0] || 'log/latest.log';
+
+open(my $IN, "<", $INFILE)
+  or die "Cannot read $INFILE: $!\n";
 
 while (<$IN>) {
     last if /===rakbench begin /;
