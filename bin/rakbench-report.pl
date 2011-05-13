@@ -35,7 +35,7 @@ while (<$IN>) {
 my %seen;
 my (@bench, @build, @trial);
 my %mark;
-while (<$IN>) {
+BENCH: while (<$IN>) {
     if (/^===rakbench run bench=(\S+) build=(\S+) trial=(\S+) ===/) {
         my ($bench, $build, $trial) = ($1, $2, $3);
         $bench =~ s!^(\S*/)?[A-Z]\d+-!!;
@@ -47,6 +47,13 @@ while (<$IN>) {
         push @build, $build unless $seen{$build}++;
         push @trial, $trial unless $seen{$trial}++;
         while (<$IN>) {
+            if (/^Command exited with non-zero status/) {
+                my $skip = <$IN>;
+                next;
+            }
+            if (/^===rakbench run bench=(\S+) build=(\S+) trial=(\S+) ===/) {
+                redo BENCH;
+            }
             if (/((\d+):(\d+.\d+)elapsed)/) {
                 my $elapsed = $2 * 60 + $3;
                 $mark{$bench}{$build}{$trial} = $elapsed;
