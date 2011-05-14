@@ -16,7 +16,7 @@ rm -rf $PARROT_INSTALL
     git pull &&
     git checkout master &&
     make realclean;
-    perl Configure.pl --optimize --gc=gms --prefix=$PARROT_INSTALL &&
+    perl Configure.pl --optimize --gc=gms --prefix=$PARROT_INSTALL_DIR &&
     make &&
     make install
 ) &&
